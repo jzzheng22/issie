@@ -171,6 +171,7 @@ let private loadStateIntoModel (compToSetup:LoadedComponent) waveSim ldComps (mo
             // Set no unsaved changes.        
 
             Sheet SheetT.UpdateBoundingBoxes
+            Sheet SheetT.UpdateLabelBoundingBoxes
 
             // set waveSim data
             SetWaveSimModel(name, waveSim)
@@ -665,15 +666,6 @@ let private newProject model dispatch  =
             dispatch <| SetUserData {model.UserData with LastUsedDirectory = Some path}
             setupProjectFromComponents "main" [initialComponent] model dispatch
 
-
-
-
-
-
-
-
-
-
 /// work out what to do opening a file
 let rec resolveComponentOpenPopup 
         (pPath:string)
@@ -771,8 +763,6 @@ let private openProject model dispatch =
 
 
 
-    
-
 /// Display the initial Open/Create Project menu at the beginning if no project
 /// is open.
 let viewNoProjectMenu model dispatch =
@@ -846,19 +836,10 @@ let getSheetTrees (p:Project) =
     |> List.map (fun ldc ->ldc.Name, subSheets []  ldc.Name)
     |> Map.ofList
 
-
-    
-
-
-    
-    
-    
-        
-
 /// Display top menu.
 let viewTopMenu model messagesFunc simulateButtonFunc dispatch =
     let compIds = getComponentIds model
-    
+
     messagesFunc model dispatch
 
     //printfn "FileView"
