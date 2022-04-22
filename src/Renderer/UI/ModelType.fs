@@ -17,6 +17,10 @@ type RightTab =
     | Properties
     | Catalogue
     | Simulation
+
+type SimSubTab =
+    | StepSim
+    | TruthTable
     | WaveSim
 
 type MemoryEditorData = {
@@ -271,12 +275,15 @@ type Msg =
     | SetWSModAndSheet of (WaveSimModel*string)
     | SetWSError of SimulationError option
     | AddWaveSimFile of string * WaveSimModel
+    | LockTabsToWaveSim
+    | UnlockTabsFromWaveSim
     | SetSimulationGraph of SimulationGraph  * FastSimulation
     | SetSimulationBase of NumberBase
     | IncrementSimulationClockTick of int
     | EndSimulation
     | EndWaveSim
     | ChangeRightTab of RightTab
+    | ChangeSimSubTab of SimSubTab
     | SetHighlighted of ComponentId list * ConnectionId list
     | SetSelWavesHighlighted of ConnectionId array
     | SetClipboard of CanvasState
@@ -381,6 +388,9 @@ type Model = {
     // if canvas is now different from that which is currently used by wave sim.
     WaveSimulationIsOutOfDate: bool
 
+    // if a wave simulation is being viewed, used to lock the tabs in place
+    WaveSimulationInProgress: bool
+
     // last time check for changes was made
 
     LastChangeCheckTime: float
@@ -400,8 +410,10 @@ type Model = {
     SelectedComponent : Component option // None if no component is selected.
     // used during step simulation: simgraph for current clock tick
     CurrentStepSimulationStep : Result<SimulationData,SimulationError> option // None if no simulation is running.
-    // which of the tabbed panes is currentlky visible
+    // which of the tabbed panes is currently visible
     RightPaneTabVisible : RightTab
+    // which of the subtabs for the right pane simulation is visible
+    SimSubTabVisible: SimSubTab
     // components and connections which are highlighted
     Hilighted : (ComponentId list * ConnectionId list) * ConnectionId list
     // Components and connections that have been selected and copied.
@@ -690,4 +702,3 @@ let switchToWaveEditor (model:Model) dispatch =
     | Some ws -> 
         dispatch <| SetWSMod {ws with WSViewState=WSViewT.WSEditorOpen}
         dispatch <| ChangeRightTab WaveSim
- 

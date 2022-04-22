@@ -1,4 +1,4 @@
-﻿module Update
+module Update
 
 open Elmish
 
@@ -370,8 +370,16 @@ let update (msg : Msg) oldModel =
         | Properties -> Cmd.batch <| editCmds
         | Catalogue -> Cmd.batch  <| editCmds
         | Simulation -> Cmd.batch <| editCmds
+        //| TruthTable -> Cmd.batch <| editCmds
+        //| WaveSim -> Cmd.ofMsg (Sheet (Sheet.SetWaveSimMode true))
+    | ChangeSimSubTab subTab ->
+        let inferMsg = JSDiagramMsg <| InferWidths()
+        let editCmds = [inferMsg; ClosePropertiesNotification] |> List.map Cmd.ofMsg
+        { model with SimSubTabVisible = subTab},
+        match subTab with
+        | StepSim -> Cmd.batch <| editCmds
+        | TruthTable -> Cmd.batch <| editCmds
         | WaveSim -> Cmd.ofMsg (Sheet (SheetT.SetWaveSimMode true))
- 
     | SetHighlighted (componentIds, connectionIds) ->
         let sModel, sCmd = SheetUpdate.update (SheetT.ColourSelection (componentIds, connectionIds, HighLightColor.Red)) model.Sheet
         {model with Sheet = sModel}, Cmd.map Sheet sCmd
