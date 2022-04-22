@@ -7,7 +7,8 @@ open Fable.React.Props
 open DiagramStyle
 open ModelType
 open FileMenuView
-open WaveformSimulationView
+// open WaveformSimulationView
+open WaveformSimulator
 open Sheet.SheetInterface
 open DrawModelType
 
@@ -65,8 +66,8 @@ let init() = {
     SelectedComponent = None
     LastUsedDialogWidth = 1
     CurrentStepSimulationStep = None
-    WaveSim = Map.empty, None
-    WaveSimSheet = ""
+    WaveSim = initWSModel//Map.empty, None
+    // WaveSimSheet = ""
     RightPaneTabVisible = Catalogue
     SimSubTabVisible = StepSim
     CurrentProj = None
@@ -124,6 +125,8 @@ let viewSimSubTab model dispatch =
         ]
     | WaveSim -> 
         div [ Style [Width "100%"; Height "calc(100% - 72px)"; MarginTop "15px" ] ]
+            ( WaveformSimulator.viewWaveSim model dispatch )
+            // ( WaveformSimulationView.viewWaveSim model dispatch )
 
 /// Display the content of the right tab.
 let private viewRightTab model dispatch =
@@ -167,6 +170,19 @@ let private viewRightTab model dispatch =
                         // if not model.WaveSimulationInProgress
                         // then
                             dispatch <| ChangeSimSubTab WaveSim
+                            let simData = SimulationView.makeSimData model
+                            match simData with
+                                // | None -> failwithf "simRes has value None" // IColor.IsWhite, ""
+                                | Some (Ok simData', reducedState) -> // IsSuccess, "Start Simulation"
+                                    let allWaves = getWaveforms netGroup2Label simData' reducedState
+                                    let wsModel' = {
+                                        model.WaveSim with
+                                            AllWaves = allWaves
+                                            OutOfDate = false
+                                            ReducedState = reducedState
+                                    }
+                                    dispatch <| SetWSMod wsModel'
+                                | _ -> failwithf "asdf"
                         ) 
                         ] [str "Wave Simulation"] ])
                     ]
@@ -231,19 +247,19 @@ let displayView model dispatch =
 //    let sd = scrollData model
 //    let x' = sd.SheetLeft+sd.SheetX
 //    let y' = sd.SheetTop+sd.SheetY
-    let wsModelOpt = getCurrentWSMod model
+    // let wsModelOpt = getCurrentWSMod model
 
-    /// Feed changed viewer width from draggable bar back to Viewer parameters TODO
-    let inline setViewerWidthInWaveSim w =
-        match currWaveSimModel model with
-        | Some wSMod when w > maxUsedViewerWidth wSMod && wSMod.WSViewState = WSViewerOpen ->
-            match wsModelOpt with
-            | Some ws ->
-                let simProgressState = 
-                    {ws.SimParams with LastClkTime = ws.SimParams.LastClkTime + 10u}
-                dispatch <| InitiateWaveSimulation(WSViewerOpen, simProgressState)
-            | _ -> ()
-        | _ -> ()
+    // /// Feed changed viewer width from draggable bar back to Viewer parameters TODO
+    // let inline setViewerWidthInWaveSim w =
+    //     match currWaveSimModel model with
+    //     | Some wSMod when w > maxUsedViewerWidth wSMod && wSMod.WSViewState = WSViewerOpen ->
+    //         match wsModelOpt with
+    //         | Some ws ->
+    //             let simProgressState = 
+    //                 {ws.SimParams with LastClkTime = ws.SimParams.LastClkTime + 10u}
+    //             dispatch <| InitiateWaveSimulation(WSViewerOpen, simProgressState)
+    //         | _ -> ()
+    //     | _ -> ()
 
     let inline processAppClick topMenu dispatch (ev: Browser.Types.MouseEvent) =
         if topMenu <> Closed then 
@@ -262,7 +278,7 @@ let displayView model dispatch =
                 |> max minViewerWidth
                 |> min (windowX - minEditorWidth)
             dispatch <| SetViewerWidth w 
-            setViewerWidthInWaveSim w
+            // setViewerWidthInWaveSim w
             dispatch <| SetDragMode (DragModeOn (int ev.clientX))
         | DragModeOn _, _ ->  
             dispatch <| SetDragMode DragModeOff
