@@ -354,13 +354,12 @@ let displayView model dispatch =
                                                 then 
                                                     dispatch <| ChangeRightTab Properties )] [str "Properties"  ] ]
                                                     
-                                    (Tabs.tab // simulation tab to view all simulators
+                                    Tabs.tab // simulation tab to view all simulators
                                         [ Tabs.Tab.IsActive (model.RightPaneTabVisible = Simulation) ]
                                         [ a [  OnClick (fun _ -> 
                                                 if not model.WaveSimulationInProgress 
                                                 then
                                                     dispatch <| ChangeRightTab Simulation ) 
-                                            ] [str "Simulations"] ] )
+                                            ] [str "Simulations"] ]
                                   ]
                         viewRightTab model dispatch  ] ] ]
-
