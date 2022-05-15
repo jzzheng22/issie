@@ -329,6 +329,13 @@ let displayView model dispatch =
             //--------------------------------------------------------------------------------------//
             //---------------------------------right section----------------------------------------//
             // right section has horizontal divider bar and tabs
+            let selectedWaves =
+                Map.filter (fun _ key -> key.Selected) model.WaveSim.AllWaves
+                |> Map.keys
+                |> Seq.length
+
+            printf "MainView.fs: displayView: %A" selectedWaves
+            
             div [ rightSectionStyle model ]
                   // vertical and draggable divider bar
                 [ dividerbar model dispatch
