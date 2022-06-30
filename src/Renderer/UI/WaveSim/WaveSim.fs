@@ -1172,13 +1172,19 @@ let viewWaveSim (model: Model) dispatch : ReactElement =
         ] [ div [] [
                 searchBar wsModel dispatch
                 selectWaves wsModel dispatch
+                selectRamModal wsModel dispatch
             ]
             div [] [
+                zoomButtons wsModel dispatch
+                radixButtons wsModel dispatch
+                clkCycleButtons wsModel dispatch
                 Icon.icon [
                     Icon.Option.Modifiers [ Modifier.IsClickable ]
                     Icon.Option.Props [ OnClick (refreshButtonAction model dispatch) ]
                 ] [ refreshSvg ]
                 showWaveforms wsModel dispatch
+                hr []
+                ramTables wsModel
             ]
             
         ]
