@@ -13,6 +13,12 @@ open SimulatorTypes
 open NumberHelpers
 open DrawModelType
 
+let childWindow = Browser.Dom.window.``open``("", "modal")
+childWindow.document.write("<div id = waveSimTop> </div>")
+
+let topDiv = childWindow.document.getElementById "waveSimTop"
+let portalToChildWindow el = ReactDom.createPortal (el, topDiv)
+
 /// Generates SVG to display waveform values when there is enough space
 /// TODO: Fix this so it does not generate all 500 cycles.
 let displayValuesOnWave wsModel (waveValues: WireData list) (transitions: NonBinaryTransition list) : ReactElement list =
@@ -1060,6 +1066,7 @@ let ramTables (wsModel: WaveSimModel) : ReactElement =
     else div [] []
 
 let refreshButtonAction model dispatch = fun _ ->
+    printf "refresh button action"
     let wsSheet = Option.get (getCurrFile model)
     let wsModel = getWSModel model
     match SimulationView.makeSimData model with
@@ -1150,9 +1157,85 @@ let topHalf (model: Model) dispatch : ReactElement =
         br []
     ]
 
+
+
+
 /// Entry point to the waveform simulator.
 let viewWaveSim (model: Model) dispatch : ReactElement =
     let wsModel = getWSModel model
+    let wsDiv =
+        div [
+            Style [
+                Display DisplayOptions.Grid
+                GridTemplateColumns "1fr 2fr"
+            ]
+        ] [ div [] [
+                searchBar wsModel dispatch
+                selectWaves wsModel dispatch
+            ]
+            div [] [
+                Icon.icon [
+                    Icon.Option.Modifiers [ Modifier.IsClickable ]
+                    Icon.Option.Props [ OnClick (refreshButtonAction model dispatch) ]
+                ] [ refreshSvg ]
+                showWaveforms wsModel dispatch
+            ]
+            
+        ]
+        // Columns.columns [] [
+        //     Column.column [
+        //         Column.Option.Width (Screen.All, Column.IsTwoThirds)
+        //     ] [
+        //         searchBar wsModel dispatch
+        //         selectWaves wsModel dispatch
+        //         // wave selection
+        //     ]
+        //     Column.column [] [
+        //         Level.level [] [
+        //             Level.left [] [
+        //                 clkCycleButtons wsModel dispatch
+
+        //                 radixButtons wsModel dispatch
+        //                 zoomButtons wsModel dispatch
+
+        //             ]
+        //             Level.right [] [
+
+
+        //             ]
+        //         ]
+                
+        //         showWaveforms wsModel dispatch
+        //         // wave buttons
+        //         // waves
+        //     ]
+        // ]
+        // div [ waveSelectionPaneStyle ]
+        //     [
+        //         topHalf model dispatch
+
+        //         match wsModel.State with
+        //         | Empty ->
+        //             div [ errorMessageStyle ]
+        //                 [ str "Start the waveform simulator by pressing the refresh button." ]
+        //         | NoProject ->
+        //             div [ errorMessageStyle ]
+        //                 [ str "Please open a project to use the waveform simulator." ]
+        //         | SimError e ->
+        //             div [ errorMessageStyle ]
+        //                 [ SimulationView.viewSimulationError e ]
+        //         | NonSequential ->
+        //             div [ errorMessageStyle ]
+        //                 [ str "There is no sequential logic in this circuit." ]
+        //         | Success ->
+        //             showWaveforms wsModel dispatch
+
+        //             hr []
+
+        //             ramTables wsModel
+
+        //         hr []
+        //     ]
     div [ waveSelectionPaneStyle ]
         [
             topHalf model dispatch
@@ -1171,11 +1254,13 @@ let viewWaveSim (model: Model) dispatch : ReactElement =
                 div [ errorMessageStyle ]
                     [ str "There is no sequential logic in this circuit." ]
             | Success ->
-                showWaveforms wsModel dispatch
+                portalToChildWindow wsDiv
 
-                hr []
+                // showWaveforms wsModel dispatch
 
-                ramTables wsModel
+                // hr []
 
-            hr []
+                // ramTables wsModel
+
+            // hr []
         ]
